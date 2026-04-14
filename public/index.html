@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="description" content="Find free, confidential HIV and STI testing near you. Powered by CDC data."/>
+<meta name="theme-color" content="#C8392B"/>
+<link rel="manifest" href="/manifest.json"/>
+<title>TestNear — HIV & STI Testing Locator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Lora:ital@1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link rel="stylesheet" href="/app.css"/>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="topbar" id="topbar">🔒 <span data-i18n="topbar">100% private — no account required &nbsp;|&nbsp; HIV Hotline:</span> <a id="topbar-hotline" href="tel:18002324636">1-800-232-4636</a></div>
+<header>
+  <nav>
+    <div class="logo"><div class="logo-icon">✚</div><span>Test<span style="color:var(--red)">Near</span></span></div>
+    <div class="nav-links">
+      <span class="nav-link active" onclick="showTab('locator')" tabindex="0">Find Testing</span>
+      <span class="nav-link" onclick="showTab('resources')" tabindex="0">Resources</span>
+      <span class="nav-link" onclick="showTab('quiz')" tabindex="0">Risk Check</span>
+      <a class="nav-cta" href="tel:18002324636">📞 HIV Hotline</a>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('es')">ES</button>
+    </div>
+  </nav>
+</header>
+<div class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab active" id="tab-locator" onclick="showTab('locator')">🗺 Find Testing <span class="tab-badge" id="badge-count">0</span></div>
+    <div class="tab" id="tab-resources" onclick="showTab('resources')">📚 Resources</div>
+    <div class="tab" id="tab-quiz" onclick="showTab('quiz')">🧪 Risk Check</div>
+  </div>
+</div>
+
+<!-- LOCATOR -->
+<div class="section active" id="section-locator">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge" data-i18n="hero.badge">Free & Confidential Testing Nationwide</div>
+      <h1><span data-i18n="hero.h1a">Find HIV & STI Testing</span><br><em data-i18n="hero.h1b">Near You — Right Now</em></h1>
+      <p class="hero-sub" data-i18n="hero.sub">Powered by CDC NPIN & HRSA. No insurance needed, no judgment.</p>
+      <div class="sc" role="search">
+        <div class="sc-row">
+          <div class="ig"><label for="zipInput" data-i18n="search.zipLabel">ZIP Code or City</label><span class="ig-icon">📍</span><input type="text" id="zipInput" placeholder="e.g. 30303 or Atlanta, GA" autocomplete="postal-code" maxlength="40"/></div>
+          <div class="ig" style="max-width:130px;"><label for="radSel" data-i18n="search.radiusLabel">Radius</label><span class="ig-icon">📏</span><select id="radSel"><option value="5">5 mi</option><option value="10" selected>10 mi</option><option value="25">25 mi</option><option value="50">50 mi</option></select></div>
+          <button class="btn-go" id="searchBtn" onclick="doSearch()">🔍 <span data-i18n="search.btn">Search</span></button>
+        </div>
+        <div class="filter-row">
+          <span class="fl" data-i18n="search.filterLabel">Filter:</span>
+          <div class="chip on" id="chip-hiv" onclick="toggleChip('hiv')" data-i18n="search.filters.hiv">HIV Testing</div>
+          <div class="chip on" id="chip-sti" onclick="toggleChip('sti')" data-i18n="search.filters.sti">STI / STD</div>
+          <div class="chip" id="chip-free" onclick="toggleChip('free')" data-i18n="search.filters.free">Free Only</div>
+          <div class="chip" id="chip-walkin" onclick="toggleChip('walkin')" data-i18n="search.filters.walkin">Walk-in</div>
+          <div class="chip" id="chip-conf" onclick="toggleChip('conf')" data-i18n="search.filters.conf">Confidential</div>
+          <div class="chip" id="chip-prep" onclick="toggleChip('prep')" data-i18n="search.filters.prep">PrEP</div>
+          <div class="chip" id="chip-hep" onclick="toggleChip('hep')" data-i18n="search.filters.hep">Hepatitis</div>
+        </div>
+        <div class="gps-row"><button class="btn-gps" id="gpsBtn" onclick="useGPS()">📡 <span data-i18n="search.gps">Use my current location</span></button><span style="font-size:11px;color:var(--text3)" data-i18n="search.gpsNote">Your location is never stored.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pwa-banner hidden" id="pwaBanner"><div class="pwa-icon">📱</div><div class="pwa-text"><strong data-i18n="pwa.install">Add to Home Screen</strong><span data-i18n="pwa.installSub"> — Use TestNear like an app</span></div><div class="pwa-btns"><button class="btn-pwa-install" id="btnInstall">Install</button><button class="btn-pwa-dismiss" onclick="document.getElementById('pwaBanner').classList.add('hidden')">✕</button></div></div>
+  <div class="disc-wrap"><div class="disc">⚠️ <span data-i18n="disclaimer">Data sourced from CDC NPIN & HRSA. Always call ahead to confirm hours.</span></div></div>
+  <div class="stats-row hidden" id="statsRow">
+    <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l" data-i18n="stats.total">Sites Found</div></div>
+    <div class="stat"><div class="stat-n" id="s-free">—</div><div class="stat-l" data-i18n="stats.free">Free Testing</div></div>
+    <div class="stat"><div class="stat-n" id="s-walkin">—</div><div class="stat-l" data-i18n="stats.walkin">Walk-in</div></div>
+    <div class="stat"><div class="stat-n" id="s-prep">—</div><div class="stat-l" data-i18n="stats.prep">Offer PrEP</div></div>
+  </div>
+  <div class="status-wrap hidden" id="statusWrap"><div class="status-bar" role="status" aria-live="polite"><div class="spinner"></div><span id="statusMsg">Searching…</span><span class="src-lbl hidden" id="srcLbl"></span></div></div>
+  <div class="view-toggle-wrap hidden" id="viewToggleWrap">
+    <div class="view-toggle"><button class="vt-btn active" id="btnListView" onclick="setView('list')">☰ List</button><button class="vt-btn" id="btnMapView" onclick="setView('map')">🗺 Map</button></div>
+    <select class="sort-sel" id="sortSel" onchange="rerender()"><option value="dist" data-i18n="sort.nearest">Nearest first</option><option value="name" data-i18n="sort.az">A–Z</option><option value="free" data-i18n="sort.free">Free first</option></select>
+  </div>
+  <div class="app-layout hidden" id="appLayout" id="main">
+    <div id="listViewCol"><div class="sidebar" id="cardList"></div></div>
+    <div id="detailCol"><div class="detail" id="detailPanel"><div class="detail-empty"><div class="detail-empty-icon">🏥</div><h3 data-i18n="detail.selectPrompt">Select a clinic</h3><p data-i18n="detail.selectSub">Click any result to see details.</p></div></div></div>
+    <div id="mapViewCol" class="hidden" style="grid-column:1/-1;"><div id="map"></div></div>
+  </div>
+</div>
+
+<!-- RESOURCES -->
+<div class="section" id="section-resources">
+  <div class="res-wrap">
+    <h2 class="sec-h" data-i18n="resources.title">HIV & STI Resources</h2>
+    <p class="sec-sub" data-i18n="resources.sub">Evidence-based information from CDC, NIH, and HRSA.</p>
+    <div class="edu-grid">
+      <div class="edu-card"><div class="edu-icon" style="background:var(--red-l)">🔬</div><div class="edu-title">What Is HIV Testing?</div><div class="edu-body">HIV tests check blood or oral fluid for the virus. Rapid tests give results in 20 minutes. Regular testing is essential if sexually active.</div><a class="edu-link" href="https://www.cdc.gov/hiv/testing/index.html" target="_blank" rel="noopener">CDC HIV Testing →</a></div>
+      <div class="edu-card"><div class="edu-icon" style="background:var(--teal-l)">💊</div><div class="edu-title">What Is PrEP?</div><div class="edu-body">PrEP reduces HIV risk by over 99% when taken daily. Free through ADAP, Medicaid, and manufacturer assistance programs.</div><a class="edu-link" href="https://www.cdc.gov/hiv/basics/prep.html" target="_blank" rel="noopener">Learn About PrEP →</a></div>
+      <div class="edu-card"><div class="edu-icon" style="background:var(--green-l)">🛡</div><div class="edu-title">How Often Should I Test?</div><div class="edu-body">CDC recommends annual HIV testing if sexually active. Every 3–6 months with multiple partners or injectable drug use.</div><a class="edu-link" href="https://www.cdc.gov/hiv/testing/testing-recommendations.html" target="_blank" rel="noopener">CDC Recommendations →</a></div>
+      <div class="edu-card"><div class="edu-icon" style="background:var(--blue-l)">🔒</div><div class="edu-title">Confidential vs. Anonymous</div><div class="edu-body"><strong>Confidential:</strong> Linked to ID but legally protected. <strong>Anonymous:</strong> No personal info — code only. Many sites offer both options.</div><a class="edu-link" href="https://www.hiv.gov/hiv-basics/testing/what-to-expect" target="_blank" rel="noopener">What to Expect →</a></div>
+      <div class="edu-card"><div class="edu-icon" style="background:var(--purple-l)">🧾</div><div class="edu-title">STI Testing Explained</div><div class="edu-body">Many STIs have no symptoms. Chlamydia, gonorrhea, syphilis, hepatitis — all detected with simple tests. Treatment is highly effective when caught early.</div><a class="edu-link" href="https://www.cdc.gov/std/testing-recommendations/default.htm" target="_blank" rel="noopener">STI Testing Guide →</a></div>
+      <div class="edu-card"><div class="edu-icon" style="background:var(--amber-l)">🆘</div><div class="edu-title">Just Tested Positive?</div><div class="edu-body">With ART treatment, people with HIV live long, healthy lives. Ryan White Program provides free HIV care nationwide. Connect with a provider now.</div><a class="edu-link" href="https://www.hiv.gov/hiv-basics/staying-in-hiv-care/hiv-care-and-treatment/starting-hiv-care" target="_blank" rel="noopener">Starting HIV Care →</a></div>
+    </div>
+    <div style="margin-top:28px;"><h3 style="font-size:15px;font-weight:800;margin-bottom:14px" data-i18n="resources.locatorsTitle">Official Locator Tools</h3>
+    <div class="res-grid">
+      <a class="res-card" href="https://gettested.cdc.gov" target="_blank" rel="noopener"><div class="res-name">CDC GetTested</div><div class="res-desc">Official CDC HIV/STI locator</div></a>
+      <a class="res-card" href="https://preplocator.org" target="_blank" rel="noopener"><div class="res-name">PrEP Locator (Emory/CDC)</div><div class="res-desc">National PrEP directory</div></a>
+      <a class="res-card" href="https://locator.hiv.gov" target="_blank" rel="noopener"><div class="res-name">HIV.gov Locator</div><div class="res-desc">Testing, care, housing & support</div></a>
+      <a class="res-card" href="https://aidsvu.org" target="_blank" rel="noopener"><div class="res-name">AIDSVu</div><div class="res-desc">HIV data maps</div></a>
+      <a class="res-card" href="https://www.plannedparenthood.org/get-care" target="_blank" rel="noopener"><div class="res-name">Planned Parenthood</div><div class="res-desc">STI/sexual health clinics</div></a>
+      <a class="res-card" href="https://npin.cdc.gov" target="_blank" rel="noopener"><div class="res-name">CDC NPIN</div><div class="res-desc">Prevention Information Network</div></a>
+    </div></div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="section" id="section-quiz">
+  <div class="quiz-wrap">
+    <h2 class="sec-h" style="text-align:center" data-i18n="quiz.title">HIV Risk Assessment</h2>
+    <p class="sec-sub" style="text-align:center;max-width:480px;margin:0 auto 24px" data-i18n="quiz.sub">5 anonymous questions for personalized testing recommendations.</p>
+    <div class="quiz-card" id="quizCard"></div>
+    <div style="margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 15px;font-size:12px;color:var(--text2);line-height:1.7;" data-i18n="quiz.disclaimer">Educational purposes only. No data collected.</div>
+  </div>
+</div>
+
+<!-- REMINDER MODAL -->
+<div class="modal-overlay hidden" id="reminderModal"><div class="modal" role="dialog" aria-modal="true"><div id="modalContent"></div></div></div>
+<!-- SHARE TOAST -->
+<div class="share-toast hidden" id="shareToast"></div>
+<!-- CRISIS FLOAT -->
+<div class="crisis" onclick="window.location='tel:18002324636'" role="button" tabindex="0"><div class="pulse"></div><div><div style="font-size:9px;opacity:.7;letter-spacing:.5px;margin-bottom:1px;">CRISIS LINE</div>1-800-232-4636</div></div>
+
+<footer>
+  <div class="ft-logo">✚ TestNear</div>
+  <div class="ft-grid">
+    <div><div class="ft-col-h" data-i18n="footer.sources">Data Sources</div><ul class="ft-links"><li><a href="https://gettested.cdc.gov" target="_blank">CDC NPIN GetTested</a></li><li><a href="https://findahealthcenter.hrsa.gov" target="_blank">HRSA Health Centers</a></li><li><a href="https://preplocator.org" target="_blank">PrEP Locator</a></li></ul></div>
+    <div><div class="ft-col-h" data-i18n="footer.help">Get Help Now</div><ul class="ft-links"><li id="ft-hiv-line"><a href="tel:18002324636">HIV: 800-232-4636</a></li><li><a href="tel:18009424320">SAMHSA: 800-942-4320</a></li><li><a href="https://aidsinfo.nih.gov" target="_blank">AIDSinfo (NIH)</a></li></ul></div>
+    <div><div class="ft-col-h" data-i18n="footer.about">About</div><ul class="ft-links"><li><a href="/api/health">Server Status</a></li><li><a href="mailto:NPIN@cdc.gov">Report Data Error</a></li></ul></div>
+  </div>
+  <p data-i18n="footer.tagline">Powered by CDC NPIN · HIV.gov · HRSA · No user data stored or shared.</p>
+  <p style="margin-top:4px" data-i18n="footer.hotline">National HIV/AIDS Hotline: 1-800-232-4636 (free, confidential, 24/7)</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

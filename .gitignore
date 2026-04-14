@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment (NEVER commit secrets)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Build
+dist/
+.cache/
