@@ -76,16 +76,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
-      // cdnjs.cloudflare.com: Leaflet JS + CSS
-      // fonts.googleapis.com: Google Fonts
       scriptSrc:      ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com", "fonts.googleapis.com"],
+      scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com", "fonts.googleapis.com", "fonts.gstatic.com"],
       fontSrc:        ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"],
-      // *.openstreetmap.org: map tiles (a/b/c subdomains)
-      // *.google.com: Google Maps directions links
       imgSrc:         ["'self'", "data:", "*.openstreetmap.org", "*.google.com", "cdnjs.cloudflare.com"],
-      // nominatim.openstreetmap.org: GPS reverse geocoding
-      // api.twilio.com: SMS (server-side only, but some browsers check)
       connectSrc:     ["'self'", "nominatim.openstreetmap.org", "*.openstreetmap.org"],
     },
   },
