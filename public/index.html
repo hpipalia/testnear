@@ -75,7 +75,7 @@
   </div>
   <div class="status-wrap hidden" id="statusWrap"><div class="status-bar" role="status" aria-live="polite"><div class="spinner"></div><span id="statusMsg">Searching…</span><span class="src-lbl hidden" id="srcLbl"></span></div></div>
   <div class="view-toggle-wrap hidden" id="viewToggleWrap">
-    <div class="view-toggle"><button class="vt-btn active" id="btnListView" onclick="setView('list')">☰ List</button><button class="vt-btn" id="btnMapView" onclick="setView('map')">🗺 Map</button></div>
+    <div class="view-toggle"><button class="vt-btn active" id="btnListView" onclick="setView('list')" style="pointer-events:all;z-index:50;position:relative;">☰ List</button><button class="vt-btn" id="btnMapView" onclick="setView('map')" style="pointer-events:all;z-index:50;position:relative;">🗺 Map</button></div>
     <select class="sort-sel" id="sortSel" onchange="rerender()"><option value="dist" data-i18n="sort.nearest">Nearest first</option><option value="name" data-i18n="sort.az">A–Z</option><option value="free" data-i18n="sort.free">Free first</option></select>
   </div>
   <div class="app-layout hidden" id="appLayout" id="main">
